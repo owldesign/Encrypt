@@ -5,23 +5,34 @@
     <script>
 
         var $this = this;
+        this.value = '';
 
         decryptValue(value) {
-            $.get('/encryption/decrypt', { value: value }, function(result, status){
-                $this.$setValue(result);
+            App.request('/encryption/decrypt', {value: value}).then(function(result) {
+                $this.refs.input.value = result
             });
         }
 
         this.on('mount', function() {
             this.value = this.decryptValue(this.$getValue());
-
-            this.update();
         });
 
-        this.$updateValue = function(value, field) {
-            this.value = value;
-            this.update();
-        }.bind(this);
+        // this.$updateValue = function(value, field) {
+
+            // App.request('/encryption/decrypt', {value: value}).then(function(result) {
+            //     console.log(result);
+                // $this.value = result;
+                // $this.$setValue(this.result);
+                // $this.refs.input.value = result;
+            // });
+
+            // console.log(this.value);
+            // this.value = value || '';
+            // if (count > 0) {
+            //     this.decryptValue(this.value);
+            // }
+            // this.update();
+        // }.bind(this);
 
     </script>
 

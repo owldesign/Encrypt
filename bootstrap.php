@@ -11,12 +11,12 @@ use Encrypt\Controller\Encryption;
  */
 $this->module('encrypt')->extend([
     'encrypt' => function($value) {
-        $encrypted = Encryption::encrypt($value);
+        $encrypted = Encryption::encryptRest($value);
 
         return $encrypted;
     },
     'decrypt' => function($value) {
-        $decrypted = Encryption::decrypt($value);
+        $decrypted = Encryption::decryptRest($value);
 
         return $decrypted;
     }

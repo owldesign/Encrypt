@@ -4,9 +4,16 @@ namespace Encrypt\Controller;
 
 use Defuse\Crypto\Key;
 use Defuse\Crypto\Crypto;
+use Lime\App;
 
 class Encryption
 {
+    static public $app;
+
+    function __construct() {
+        static::$app = App::instance('Cockpit');
+    }
+
     /**
      * Get Secret Key
      * @return Key
@@ -20,15 +27,17 @@ class Encryption
 
     /**
      * Encrypt Value
-     * @param null $value
      * @return string
      * @throws \Defuse\Crypto\Exception\BadFormatException
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
-    public static function encrypt($value = null) {
+    public function encrypt() {
+        $value = $this->app->param('value');
+
         if ($value == '') {
             $value = $_GET['value'];
         }
+
         $key = self::loadEncryptionKeyFromConfig();
         $encryptedValue = Crypto::encrypt($value, $key);
 
@@ -37,16 +46,55 @@ class Encryption
 
     /**
      * Decrypt Value
-     * @param null $value
      * @return string
      * @throws \Defuse\Crypto\Exception\BadFormatException
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      */
-    public static function decrypt($value = null) {
-        if ($value == '') {
-            $value = $_GET['value'];
+    public static function decrypt() {
+        $post = (static::$app->param('value') != '') ? true : false;
+        $get = isset($_GET['value']) ? true : false;
+
+        if ($post) {
+            return json_encode(self::_decrypt(static::$app->param('value')));
         }
 
+        if ($get) {
+            return self::_decrypt($_GET['value']);
+        }
+    }
+
+    /**
+     * Encrypt REST
+     * @param $value
+     * @return string
+     * @throws \Defuse\Crypto\Exception\BadFormatException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
+    public static function encryptRest($value) {
+        $key = self::loadEncryptionKeyFromConfig();
+        $encryptedValue = Crypto::encrypt($value, $key);
+        return $encryptedValue;
+    }
+
+    /**
+     * Decrypt REST
+     * @param $value
+     * @return string
+     * @throws \Defuse\Crypto\Exception\BadFormatException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
+    public static function decryptRest($value) {
+        return self::_decrypt($value);
+    }
+
+    /**
+     * Decrypting Value
+     * @param $value
+     * @return string
+     * @throws \Defuse\Crypto\Exception\BadFormatException
+     * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+     */
+    private static function _decrypt($value) {
         $key = self::loadEncryptionKeyFromConfig();
 
         try {
